@@ -1,112 +1,95 @@
 # sunsetrise
-Create Google Calendar events spanning Blue → Golden (AM) and Golden → Blue (PM) windows for a given location.
 
-## Quick start (Docker)
+Turn sunlight into schedule. Generate Golden/Blue hour windows for a location and get them into Google Calendar.
 
-1. Create a Google OAuth client (Desktop or Web) in Google Cloud Console and download the credentials JSON. Save it as `/path/to/data/client_secret.json` on your host.
-2. Build the container:
+## ✨ Features
 
-```bash
-# with Makefile
-make docker-build
+- Accurate daily windows using sunrise/sunset and civil twilight
+- Two helpful slots per day: Morning (Blue → Golden) and Evening (Golden → Blue)
+- CSV export for quick Google Calendar import (no OAuth required)
+- Optional direct write to Google Calendar via OAuth
+- Timezone auto-detected from coordinates (DST-safe)
 
-# or raw Docker
-docker build -t sunsetrise:latest /home/romenmedina/personal/sunsetrise
-```
-
-3. Run (first time prompts for auth code):
+## ⚡ 60‑second quickstart (CSV, no OAuth)
 
 ```bash
-# with Makefile (recommended)
-make docker-run LAT=40.7128 LON=-74.0060 UNTIL=2025-12-31 DATA=/path/to/data
+# 1) Build the Docker image (or use: make docker-build)
+docker build -t sunsetrise:latest .
 
-# or raw Docker
-docker run -it --rm \
-  -v /path/to/data:/data \
+# 2) Export CSV to your host (bind‑mount a folder)
+mkdir -p ./data
+docker run --rm \
+  -v "$(pwd)/data:/data" \
   sunsetrise:latest \
-  --lat 40.7128 --lon -74.0060 \
-  --until 2025-12-31
+  --lat <LAT> --lon <LON> \
+  --until <YYYY-MM-DD> \
+  --export-csv /data/sunlight.csv
+
+# Optionally, run locally without Docker:
+npm run dev -- --lat <LAT> --lon <LON> --until <YYYY-MM-DD> --export-csv ./sunlight.csv
 ```
 
-Flags:
+Import the CSV into Google Calendar:
+
+1. Open Google Calendar → Settings → Import & export → Import
+2. Choose `sunlight.csv` and the target calendar
+
+## 🔐 Alternative: Direct Google write (OAuth)
+
+Create/update events automatically on a secondary calendar.
+
+1. In Google Cloud Console, create an OAuth Client (Desktop or Web) and download the JSON
+2. Save it to `/path/to/data/client_secret.json` on your host
+3. Build and run:
+
+```bash
+make docker-build
+make docker-run LAT=<LAT> LON=<LON> UNTIL=<YYYY-MM-DD> DATA=/path/to/data
+```
+
+On first run, follow the printed auth URL and paste the code. Tokens are saved to `/data/token.json` for reuse.
+
+## 🧭 CLI flags
+
 - `--lat`, `--lon`: coordinates (required)
 - `--until`: inclusive end date `YYYY-MM-DD` (required)
 - `--start`: optional start date (default today, UTC)
 - `--tz`: optional IANA timezone (default inferred from coordinates)
-- `--calendarId`: optional target calendar ID (default creates "Golden/Blue Windows")
+- `--calendarId`: optional target calendar ID (OAuth path; default creates "Golden/Blue Windows")
 - `--dry-run`: print windows, do not write events
-- `--export-csv <path>`: write a Google Calendar importable CSV and exit
+- `--export-csv <path|->`: write a Google Calendar‑importable CSV and exit (`-` writes to stdout)
 
-OAuth files in the mounted volume `/data`:
-- `client_secret.json`: OAuth client credentials you downloaded
-- `token.json`: generated after first run and reused
+## 🧰 Makefile commands
 
-## What it creates
-- A secondary calendar named `Golden/Blue Windows` (unless `--calendarId` used)
-- For each day: two events
-  - Morning: `civil dawn → goldenHourEnd` (Blue → Golden)
-  - Evening: `goldenHourStart → civil dusk` (Golden → Blue)
-
-## Dev
-
-```bash
-# Install dependencies inside Docker (no host Node needed)
-make install
-
-# Local dry run without writing to Google Calendar
-npm run dev -- --lat 40.7 --lon -74.0 --until 2025-12-31 --dry-run
-```
-
-## Tests
-
-```bash
-# Using Makefile
-make test
-make test-watch
-
-# Or with npm
-npm test
-npm run test:watch
-```
-
-## CSV export for Google Calendar
-
-To produce a CSV you can import into Google Calendar:
-
-```bash
-# Inside Docker container run (mount to persist onto host)
-docker run -it --rm \
-  -v /path/to/data:/data \
-  sunsetrise:latest \
-  --lat 40.7128 --lon -74.0060 \
-  --until 2025-12-31 \
-  --export-csv /data/sunlight.csv
-
-# Or with Makefile (ensure image built)
-make docker-run LAT=40.7128 LON=-74.0060 UNTIL=2025-12-31 DATA=/path/to/data \
-  -- --export-csv /data/sunlight.csv
-```
-
-Then, in Google Calendar: Settings -> Import & export -> Import -> select the CSV and target calendar.
-
-Local (no Docker) examples:
-
-```bash
-# Write CSV to a local file
-npm run dev -- --lat 40.7128 --lon -74.0060 --until 2025-12-31 --export-csv ./sunlight.csv
-
-# Or print to stdout and redirect
-npm run dev -- --lat 40.7128 --lon -74.0060 --until 2025-12-31 --export-csv - > sunlight.csv
-```
-
-## Makefile commands
-
-- `make install`: run npm install inside a Docker container, using your UID/GID and binding the repo
+- `make install`: install deps inside Docker using your UID/GID
 - `make test`, `make test-watch`: run unit tests (Vitest)
 - `make docker-build`: build the production image
 - `make docker-run LAT=.. LON=.. UNTIL=.. [TZ=.. CALENDAR_ID=.. DATA=./data]`: run the tool
 
-Environment variables (optional):
+## 📅 What gets created
+
+- A secondary calendar named `Golden/Blue Windows` (OAuth path)
+- Two events per day:
+  - Morning: civil dawn → goldenHourEnd (Blue → Golden)
+  - Evening: goldenHourStart → civil dusk (Golden → Blue)
+
+## 💡 Tips
+
+- Use a dedicated calendar when importing CSV so you can color/toggle easily
+- Re‑run when traveling to rebuild CSV or update events for your new location
+- Override timezone with `--tz` if you need to pin a specific region
+
+## ❓ FAQ
+
+- Do I need `/data` to export CSV?
+  - Only when using Docker. `/data` is the bind‑mounted folder so the CSV persists on your host. Locally you can write anywhere, or use `--export-csv -` to print to stdout.
+- Will Google import create duplicates?
+  - If you import the same CSV multiple times, Google may create duplicates. Prefer importing into a dedicated calendar so you can clear/re‑import easily.
+- Polar regions?
+  - Days with missing sunrise/sunset will be skipped.
+
+## ⚙️ Environment variables (optional)
+
 - `CALENDAR_NAME`: override default calendar display name
-- `TOKEN_PATH`: path for storing token (default `/data/token.json`)
+- `TOKEN_PATH`: where to store OAuth token (default `/data/token.json`)
 - `CLIENT_PATH`: path to OAuth client JSON (default `/data/client_secret.json`)
