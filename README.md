@@ -1,12 +1,12 @@
 # SunsetRise Calendar
 
-Turn sunlight into schedule. Generate Golden/Blue hour windows for a location and get them into Google Calendar.
+Turn sunlight into schedule. Generate Golden/Blue hour windows for a location and import them into your calendar.
 
 ## ✨ Features
 
 - Accurate daily windows using sunrise/sunset and civil twilight
 - Two helpful slots per day: Morning (Blue → Golden) and Evening (Golden → Blue)
-- ICS (default) and CSV export for quick Google Calendar import (no OAuth required)
+- ICS (default) and CSV export for quick calendar import (no OAuth required)
 - Export only. No OAuth, no tokens, no external services
 - Timezone auto-detected from coordinates (DST-safe)
 
@@ -30,12 +30,12 @@ make calendar FORMAT=csv LAT=<LAT> LON=<LON> OUT=./data/sunlight.csv
 npm run dev -- --lat <LAT> --lon <LON> --until <YYYY-MM-DD> --export-ics ./sunlight.ics
 ```
 
-Import the ICS into Google Calendar:
+Import the ICS into your calendar app:
 
-1. Open Google Calendar → Settings → Import & export → Import
+1. Open your calendar app’s Import feature
 2. Choose `sunlight.ics` and the target calendar
 
-No OAuth needed: export ICS/CSV and import into any calendar.
+No OAuth needed: export ICS/CSV and import into any calendar app.
 
 ## 🧭 CLI flags
 
@@ -46,7 +46,7 @@ No OAuth needed: export ICS/CSV and import into any calendar.
 - `--calendarId`: (removed)
 - `--dry-run`: print windows, do not write events
 - `--export-ics <path|->`: write an ICS calendar file and exit (`-` writes to stdout)
-- `--export-csv <path|->`: write a Google Calendar‑importable CSV and exit (`-` writes to stdout)
+- `--export-csv <path|->`: write a CSV calendar file and exit (`-` writes to stdout)
 
 ## 🧰 Makefile commands
 
@@ -73,8 +73,8 @@ No OAuth needed: export ICS/CSV and import into any calendar.
 
 - Do I need `/data` to export files?
   - Only when using Docker. `/data` is the bind‑mounted folder so ICS/CSV files persist on your host. Locally you can write anywhere, or use `--export-ics -` / `--export-csv -` to print to stdout.
-- Will Google import create duplicates?
-  - If you import the same CSV multiple times, Google may create duplicates. Prefer importing into a dedicated calendar so you can clear/re‑import easily.
+- Will importing create duplicates?
+  - If you import the same file multiple times, many calendar apps will create duplicates. Prefer importing into a dedicated calendar so you can clear/re‑import easily.
 - Polar regions?
   - Days with missing sunrise/sunset will be skipped.
 

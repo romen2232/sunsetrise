@@ -30,6 +30,9 @@ describe('windowsToICS', () => {
     expect(ics).toMatch(/SUMMARY:\d{2}:\d{2} (Sunrise|Sunset)/);
     expect(ics).toContain('DTSTART:');
     expect(ics).toContain('DTEND:');
+    // Alarms present
+    expect(ics).toContain('BEGIN:VALARM');
+    expect(ics).toContain('TRIGGER:');
   });
 });
 

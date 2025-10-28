@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { buildDayDescriptions, I18N } from '../src/schedule';
+import { buildDayDescriptions } from '../src/schedule';
+import { I18N } from '../src/i18n';
 import type { DailyWindow } from '../src/sunwindows';
 
 const base: Omit<DailyWindow, 'anchors'> = {

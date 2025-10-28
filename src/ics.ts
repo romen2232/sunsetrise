@@ -80,6 +80,20 @@ export function windowsToICS(
     // Categories for grouping
     const cat = w.kind === 'morning' ? label('morning', lang) : label('evening', lang);
     lines.push(foldLine(`CATEGORIES:${escapeText(cat)}`));
+    // Alarms: Sunrise at start; Sunset 15 minutes before start
+    if (w.kind === 'morning') {
+      lines.push('BEGIN:VALARM');
+      lines.push('ACTION:DISPLAY');
+      lines.push('DESCRIPTION:Sunrise');
+      lines.push('TRIGGER:PT0M');
+      lines.push('END:VALARM');
+    } else {
+      lines.push('BEGIN:VALARM');
+      lines.push('ACTION:DISPLAY');
+      lines.push('DESCRIPTION:Sunset');
+      lines.push('TRIGGER:-PT15M');
+      lines.push('END:VALARM');
+    }
     lines.push('STATUS:CONFIRMED');
     lines.push('TRANSP:OPAQUE');
     lines.push('END:VEVENT');
