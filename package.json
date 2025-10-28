@@ -1,8 +1,8 @@
 {
-  "name": "sunsetrise",
+  "name": "sunsetrise-calendar",
   "version": "0.1.0",
   "private": true,
-  "description": "Create Google Calendar events for golden/blue hour windows",
+  "description": "Generate ICS/CSV calendars for golden/blue hour windows",
   "license": "MIT",
   "type": "commonjs",
   "scripts": {

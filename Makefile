@@ -30,7 +30,7 @@ build:
 	npm run build
 
 docker-build:
-	docker build -t sunsetrise:latest .
+	docker build -t sunsetrise-calendar:latest .
 
 # Variables for docker-run; override on command line, e.g.:
 # make docker-run LAT=40.7128 LON=-74.0060 UNTIL=2025-12-31 DATA=./data
@@ -55,7 +55,7 @@ docker-run:
 	@[ -n "$(UNTIL)" ] || (echo "UNTIL is required (YYYY-MM-DD)" && exit 1)
 	docker run -it --rm -u $(UID):$(GID) \
 	  -v $(abspath $(DATA)):/data \
-	  sunsetrise:latest \
+	  sunsetrise-calendar:latest \
 	  --lat $(LAT) --lon $(LON) --until $(UNTIL) \
 	  $(if $(TZ),--tz $(TZ),) $(if $(CALENDAR_ID),--calendarId $(CALENDAR_ID),) $(EXTRA)
 
