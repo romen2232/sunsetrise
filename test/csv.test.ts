@@ -25,7 +25,7 @@ describe('windowsToGoogleCsv', () => {
 
     const csv = windowsToGoogleCsv(windows);
     const lines = csv.trim().split('\n');
-    expect(lines[0]).toContain('Subject, Start Date, Start Time, End Date, End Time');
+    expect(lines[0]).toContain('Subject,Start Date,Start Time,End Date,End Time');
     expect(lines.length).toBe(3);
     expect(lines[1]).toContain('Blue → Golden hour (AM)');
     expect(lines[2]).toContain('Golden → Blue hour (PM)');

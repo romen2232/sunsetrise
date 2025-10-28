@@ -6,33 +6,27 @@ Turn sunlight into schedule. Generate Golden/Blue hour windows for a location an
 
 - Accurate daily windows using sunrise/sunset and civil twilight
 - Two helpful slots per day: Morning (Blue → Golden) and Evening (Golden → Blue)
-- CSV export for quick Google Calendar import (no OAuth required)
+- ICS and CSV export for quick Google Calendar import (no OAuth required)
 - Optional direct write to Google Calendar via OAuth
 - Timezone auto-detected from coordinates (DST-safe)
 
-## ⚡ 60‑second quickstart (CSV, no OAuth)
+## ⚡ 60‑second quickstart (ICS, no OAuth)
 
 ```bash
 # 1) Build the Docker image (or use: make docker-build)
 docker build -t sunsetrise:latest .
 
-# 2) Export CSV to your host (bind‑mount a folder)
-mkdir -p ./data
-docker run --rm \
-  -v "$(pwd)/data:/data" \
-  sunsetrise:latest \
-  --lat <LAT> --lon <LON> \
-  --until <YYYY-MM-DD> \
-  --export-csv /data/sunlight.csv
+# 2) Export ICS with one command
+make ics LAT=<LAT> LON=<LON> UNTIL=<YYYY-MM-DD> LANG=es
 
 # Optionally, run locally without Docker:
-npm run dev -- --lat <LAT> --lon <LON> --until <YYYY-MM-DD> --export-csv ./sunlight.csv
+npm run dev -- --lat <LAT> --lon <LON> --until <YYYY-MM-DD> --export-ics ./sunlight.ics
 ```
 
-Import the CSV into Google Calendar:
+Import the ICS into Google Calendar:
 
 1. Open Google Calendar → Settings → Import & export → Import
-2. Choose `sunlight.csv` and the target calendar
+2. Choose `sunlight.ics` and the target calendar
 
 ## 🔐 Alternative: Direct Google write (OAuth)
 
@@ -57,6 +51,7 @@ On first run, follow the printed auth URL and paste the code. Tokens are saved t
 - `--tz`: optional IANA timezone (default inferred from coordinates)
 - `--calendarId`: optional target calendar ID (OAuth path; default creates "Golden/Blue Windows")
 - `--dry-run`: print windows, do not write events
+- `--export-ics <path|->`: write an ICS calendar file and exit (`-` writes to stdout)
 - `--export-csv <path|->`: write a Google Calendar‑importable CSV and exit (`-` writes to stdout)
 
 ## 🧰 Makefile commands
@@ -64,7 +59,9 @@ On first run, follow the printed auth URL and paste the code. Tokens are saved t
 - `make install`: install deps inside Docker using your UID/GID
 - `make test`, `make test-watch`: run unit tests (Vitest)
 - `make docker-build`: build the production image
-- `make docker-run LAT=.. LON=.. UNTIL=.. [TZ=.. CALENDAR_ID=.. DATA=./data]`: run the tool
+- `make docker-run LAT=.. LON=.. UNTIL=.. [TZ=.. CALENDAR_ID=.. DATA=./data EXTRA=..]`: run the tool
+- `make ics LAT=.. LON=.. UNTIL=.. [LANG=en] [ICS_OUT=./data/sunlight.ics]`: export ICS
+- `make csv LAT=.. LON=.. UNTIL=.. [CSV_OUT=./data/sunlight.csv]`: export CSV
 
 ## 📅 What gets created
 
@@ -81,8 +78,8 @@ On first run, follow the printed auth URL and paste the code. Tokens are saved t
 
 ## ❓ FAQ
 
-- Do I need `/data` to export CSV?
-  - Only when using Docker. `/data` is the bind‑mounted folder so the CSV persists on your host. Locally you can write anywhere, or use `--export-csv -` to print to stdout.
+- Do I need `/data` to export files?
+  - Only when using Docker. `/data` is the bind‑mounted folder so ICS/CSV files persist on your host. Locally you can write anywhere, or use `--export-ics -` / `--export-csv -` to print to stdout.
 - Will Google import create duplicates?
   - If you import the same CSV multiple times, Google may create duplicates. Prefer importing into a dedicated calendar so you can clear/re‑import easily.
 - Polar regions?

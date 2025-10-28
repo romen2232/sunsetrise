@@ -4,6 +4,7 @@ import { computeDailyWindows } from './sunwindows';
 import { getOAuthClient } from './oauth';
 import { upsertWindowsAsEvents } from './upsert';
 import { windowsToGoogleCsv } from './csv';
+import { windowsToICS } from './ics';
 
 const program = new Command();
 
@@ -17,6 +18,8 @@ program
   .option('--calendarId <id>', 'Target Google Calendar ID (default: create/find named "Golden/Blue Windows")')
   .option('--tz <iana>', 'IANA timezone; default inferred from lat/lon')
   .option('--export-csv <path>', 'Write Google Calendar importable CSV to path and exit')
+  .option('--export-ics <path>', 'Write ICS calendar file to path and exit')
+  .option('--lang <code>', 'Localization for summaries: en|es (default en)')
   .option('--dry-run', 'Do not call Google API, just print windows', false)
   .parse(process.argv);
 
@@ -30,6 +33,8 @@ async function main() {
     tz?: string;
     dryRun?: boolean;
     exportCsv?: string;
+    exportIcs?: string;
+    lang?: 'en' | 'es';
   }>();
 
   const start = opts.start
@@ -55,6 +60,19 @@ async function main() {
     for (const w of windows) {
       // eslint-disable-next-line no-console
       console.log(`${w.date} | ${w.kind} | ${w.start} -> ${w.end} (${w.timezone})`);
+    }
+    return;
+  }
+
+  if (opts.exportIcs) {
+    const ics = windowsToICS(windows, { lang: opts.lang });
+    if (opts.exportIcs === '-') {
+      process.stdout.write(ics);
+    } else {
+      const fs = await import('fs/promises');
+      await fs.writeFile(opts.exportIcs, ics, 'utf8');
+      // eslint-disable-next-line no-console
+      console.log(`ICS written to ${opts.exportIcs}`);
     }
     return;
   }

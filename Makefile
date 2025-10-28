@@ -1,4 +1,4 @@
-.PHONY: help install test test-watch build docker-build docker-run
+.PHONY: help install test test-watch build docker-build docker-run ics csv
 
 help:
 	@echo "Available targets:"
@@ -8,6 +8,8 @@ help:
 	@echo "  make build          # Compile TypeScript"
 	@echo "  make docker-build   # Build Docker image"
 	@echo "  make docker-run     # Run container (set LAT, LON, UNTIL, DATA)"
+	@echo "  make ics            # Export ICS (LAT, LON, UNTIL, [LANG], [ICS_OUT])"
+	@echo "  make csv            # Export CSV (LAT, LON, UNTIL, [CSV_OUT])"
 
 # Dockerized install to avoid host Node.js dependency and permission issues
 NODE_IMAGE ?= node:20-alpine
@@ -39,15 +41,38 @@ UNTIL ?=
 TZ ?=
 CALENDAR_ID ?=
 DATA ?= ./data
+# Resolve host user/group to avoid root-owned files from container writes
+UID := $(shell id -u)
+GID := $(shell id -g)
+EXTRA ?=
+ICS_OUT ?= ./data/sunlight.ics
+CSV_OUT ?= ./data/sunlight.csv
+LANG ?= en
 
 docker-run:
 	@[ -n "$(LAT)" ] || (echo "LAT is required" && exit 1)
 	@[ -n "$(LON)" ] || (echo "LON is required" && exit 1)
 	@[ -n "$(UNTIL)" ] || (echo "UNTIL is required (YYYY-MM-DD)" && exit 1)
-	docker run -it --rm \
+	docker run -it --rm -u $(UID):$(GID) \
 	  -v $(abspath $(DATA)):/data \
 	  sunsetrise:latest \
 	  --lat $(LAT) --lon $(LON) --until $(UNTIL) \
-	  $(if $(TZ),--tz $(TZ),) $(if $(CALENDAR_ID),--calendarId $(CALENDAR_ID),)
+	  $(if $(TZ),--tz $(TZ),) $(if $(CALENDAR_ID),--calendarId $(CALENDAR_ID),) $(EXTRA)
+
+# Convenience target: export ICS
+ics: docker-build
+	@[ -n "$(LAT)" ] || (echo "LAT is required" && exit 1)
+	@[ -n "$(LON)" ] || (echo "LON is required" && exit 1)
+	@[ -n "$(UNTIL)" ] || (echo "UNTIL is required (YYYY-MM-DD)" && exit 1)
+	@mkdir -p $(dir $(ICS_OUT))
+	$(MAKE) docker-run LAT=$(LAT) LON=$(LON) UNTIL=$(UNTIL) DATA=$(dir $(abspath $(ICS_OUT))) EXTRA="--export-ics /data/$(notdir $(ICS_OUT)) $(if $(LANG),--lang $(LANG),) $(if $(START),--start $(START),)"
+
+# Convenience target: export CSV
+csv: docker-build
+	@[ -n "$(LAT)" ] || (echo "LAT is required" && exit 1)
+	@[ -n "$(LON)" ] || (echo "LON is required" && exit 1)
+	@[ -n "$(UNTIL)" ] || (echo "UNTIL is required (YYYY-MM-DD)" && exit 1)
+	@mkdir -p $(dir $(CSV_OUT))
+	$(MAKE) docker-run LAT=$(LAT) LON=$(LON) UNTIL=$(UNTIL) DATA=$(dir $(abspath $(CSV_OUT))) EXTRA="--export-csv /data/$(notdir $(CSV_OUT))"
 
 

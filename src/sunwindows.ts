@@ -10,6 +10,8 @@ export interface DailyWindow {
   kind: WindowKind;
   start: string; // ISO in local time
   end: string; // ISO in local time
+  latitude?: number;
+  longitude?: number;
   anchors: {
     civilDawn?: string;
     sunrise?: string;
@@ -87,6 +89,8 @@ export async function computeDailyWindows(params: ComputeParams): Promise<DailyW
         kind: 'morning',
         start: anchors.civilDawn!,
         end: anchors.goldenHourEnd!,
+        latitude: params.latitude,
+        longitude: params.longitude,
         anchors,
       });
     }
@@ -99,6 +103,8 @@ export async function computeDailyWindows(params: ComputeParams): Promise<DailyW
         kind: 'evening',
         start: anchors.goldenHourStart!,
         end: anchors.civilDusk!,
+        latitude: params.latitude,
+        longitude: params.longitude,
         anchors,
       });
     }
