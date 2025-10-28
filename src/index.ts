@@ -1,8 +1,6 @@
 import { Command } from 'commander';
 import { DateTime } from 'luxon';
 import { computeDailyWindows } from './sunwindows';
-import { getOAuthClient } from './oauth';
-import { upsertWindowsAsEvents } from './upsert';
 import { windowsToGoogleCsv } from './csv';
 import { windowsToICS } from './ics';
 
@@ -15,7 +13,6 @@ program
   .requiredOption('--lon <number>', 'Longitude', parseFloat)
   .option('--start <date>', 'Inclusive start date (YYYY-MM-DD), default today')
   .requiredOption('--until <date>', 'Inclusive end date (YYYY-MM-DD)')
-  .option('--calendarId <id>', 'Target Google Calendar ID (default: create/find named "Golden/Blue Windows")')
   .option('--tz <iana>', 'IANA timezone; default inferred from lat/lon')
   .option('--export-csv <path>', 'Write Google Calendar importable CSV to path and exit')
   .option('--export-ics <path>', 'Write ICS calendar file to path and exit')
@@ -29,7 +26,6 @@ async function main() {
     lon: number;
     start?: string;
     until: string;
-    calendarId?: string;
     tz?: string;
     dryRun?: boolean;
     exportCsv?: string;
@@ -91,12 +87,8 @@ async function main() {
     return;
   }
 
-  const oauth2Client = await getOAuthClient();
-  await upsertWindowsAsEvents({
-    oauth2Client,
-    windows,
-    calendarId: opts.calendarId,
-  });
+  // No OAuth flow; CLI exports only
+  throw new Error('Specify --export-ics <path> or --export-csv <path>');
 }
 
 main().catch((err) => {

@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "googleapis": "^144.0.0",
     "luxon": "^3.5.0",
     "suncalc": "^1.9.0",
     "tz-lookup": "^6.1.25"

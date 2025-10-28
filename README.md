@@ -7,7 +7,7 @@ Turn sunlight into schedule. Generate Golden/Blue hour windows for a location an
 - Accurate daily windows using sunrise/sunset and civil twilight
 - Two helpful slots per day: Morning (Blue → Golden) and Evening (Golden → Blue)
 - ICS and CSV export for quick Google Calendar import (no OAuth required)
-- Optional direct write to Google Calendar via OAuth
+- Export only (ICS/CSV). Direct Google OAuth write removed for simplicity
 - Timezone auto-detected from coordinates (DST-safe)
 
 ## ⚡ 60‑second quickstart (ICS, no OAuth)
@@ -28,20 +28,9 @@ Import the ICS into Google Calendar:
 1. Open Google Calendar → Settings → Import & export → Import
 2. Choose `sunlight.ics` and the target calendar
 
-## 🔐 Alternative: Direct Google write (OAuth)
+## 🔐 About OAuth
 
-Create/update events automatically on a secondary calendar.
-
-1. In Google Cloud Console, create an OAuth Client (Desktop or Web) and download the JSON
-2. Save it to `/path/to/data/client_secret.json` on your host
-3. Build and run:
-
-```bash
-make docker-build
-make docker-run LAT=<LAT> LON=<LON> UNTIL=<YYYY-MM-DD> DATA=/path/to/data
-```
-
-On first run, follow the printed auth URL and paste the code. Tokens are saved to `/data/token.json` for reuse.
+Direct write to Google Calendar via OAuth has been removed to keep setup simple and private. Export ICS/CSV and import into any calendar.
 
 ## 🧭 CLI flags
 
@@ -49,7 +38,7 @@ On first run, follow the printed auth URL and paste the code. Tokens are saved t
 - `--until`: inclusive end date `YYYY-MM-DD` (required)
 - `--start`: optional start date (default today, UTC)
 - `--tz`: optional IANA timezone (default inferred from coordinates)
-- `--calendarId`: optional target calendar ID (OAuth path; default creates "Golden/Blue Windows")
+- `--calendarId`: (removed)
 - `--dry-run`: print windows, do not write events
 - `--export-ics <path|->`: write an ICS calendar file and exit (`-` writes to stdout)
 - `--export-csv <path|->`: write a Google Calendar‑importable CSV and exit (`-` writes to stdout)
