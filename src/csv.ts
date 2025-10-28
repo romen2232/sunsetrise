@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import type { DailyWindow } from './sunwindows';
+import { buildDayDescriptions } from './schedule';
 
 /*
 Google Calendar CSV expected headers (English locale):
@@ -25,7 +26,8 @@ export function windowsToGoogleCsv(windows: DailyWindow[]): string {
     const start = DateTime.fromISO(w.start).setZone(w.timezone);
     const end = DateTime.fromISO(w.end).setZone(w.timezone);
     const title = w.kind === 'morning' ? 'Blue → Golden hour (AM)' : 'Golden → Blue hour (PM)';
-    const description = buildCsvDescription(w);
+    const { text } = buildDayDescriptions(w, 'en');
+    const description = text;
     return [
       csvEscape(title),
       csvEscape(start.toFormat('MM/dd/yyyy')),

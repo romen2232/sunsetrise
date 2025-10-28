@@ -6,6 +6,5 @@ dist
 .git
 **/.git
 **/.cache
-data/
-data/**
+data/*
 !data/.gitkeep

@@ -26,9 +26,11 @@ describe('windowsToGoogleCsv', () => {
     const csv = windowsToGoogleCsv(windows);
     const lines = csv.trim().split('\n');
     expect(lines[0]).toContain('Subject,Start Date,Start Time,End Date,End Time');
-    expect(lines.length).toBe(3);
-    expect(lines[1]).toContain('Blue → Golden hour (AM)');
-    expect(lines[2]).toContain('Golden → Blue hour (PM)');
+    // We now include multiline descriptions; ensure at least 2 data rows exist.
+    const dataRows = lines.filter((l, idx) => idx > 0 && !l.startsWith('Subject'));
+    expect(dataRows.length).toBeGreaterThanOrEqual(2);
+    expect(csv).toContain('Blue → Golden hour (AM)');
+    expect(csv).toContain('Golden → Blue hour (PM)');
   });
 });
 
